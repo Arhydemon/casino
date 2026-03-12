@@ -1,11 +1,12 @@
 import flet as ft
 
-def main(page: ft.Page):
+def main(page: ft.Page) -> None:
     page.title = "Дым дым казино и бляди"
-    page.window.width = 1920
-    page.window.height = 1080
+    page.window.width = 1920 # ширина
+    page.window.height = 1080 # высота
     
-    page.add(
-        ft.Text("Казик йоу"))
+    title_text: ft.Text = ft.Text("Казик йоу")
     
-ft.app(target=main) 
+    page.add(title_text)
+
+ft.app(target=main)
