@@ -1,15 +1,15 @@
-import os
-import sys
 import flet as ft
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))  # добавляем папку app в путь импорта
-from app_state import *
+from app.app_state import AppState
+from app.games.roulette.game import RouletteGame
 
 def show_roulette_screen(page: ft.Page, state: AppState, go_back) -> None:
     page.controls.clear()
+    game: RouletteGame = RouletteGame(state)
 
     title_text: ft.Text = ft.Text('Рулеточка', size=30)
-    balance_text: ft.Text = ft.Text('Баланс', size=30)
-    info_text: ft.Text = ft.Text('тута будет логика рулетки', size=30)
+    balance_text: ft.Text = ft.Text(f'Баланс: {state.player.balance}', size=30)
+    info_text: ft.Text = ft.Text('Сделай ставку и жми СПИН', size=30)
+    
 
     def back_to_menu(event: ft.ControlEvent) ->None:
         go_back()
