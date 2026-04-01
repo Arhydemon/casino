@@ -1,5 +1,5 @@
 import flet as ft
-from app_state import *
+from app.app_state import *
 
 def main(page: ft.Page) -> None:
     page.title = "Дым дым казино и бляди"
