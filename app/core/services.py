@@ -27,8 +27,13 @@ class AppStateService:
             pass
         return state
 
-    def save_balance(self, state: AppState) -> None:
+    def save_state(self, state: AppState) -> None:
         profile = self.profile_repository.get_profile()
+    
         if profile is None:
-            return
-        self.profile_repository.update_balance(profile.id, state.player.balance)
+            profile = self.profile_repository.create_default_profile()
+    
+        self.profile_repository.update_balance(
+            profile.id,
+            state.player.balance
+        )
