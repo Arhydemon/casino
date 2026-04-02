@@ -16,11 +16,11 @@ class DatabaseManager:
 
     def connect(self) -> sqlite3.Connection: # создаёт соединение с SQLite.
         connection = sqlite3.connect(self.db_path) 
-        connection.row_factory = sqlite3.Row
+        connection.row_factory = sqlite3.Row # как словари а не кортежики
         return connection
 
     def initialize(self) -> None: # создание таблиц если их нихуя нет 
-        with self.connect() as connection:
+        with self.connect() as connection: # соединение с БД
             cursor = connection.cursor()
 
             cursor.execute("""
