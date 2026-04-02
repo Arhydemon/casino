@@ -53,10 +53,8 @@ class CasinoApp:
         self.page.add(self.main_menu_column)
         self.page.update()
 
-
 def main(page: ft.Page) -> None:
     app = CasinoApp(page)
     app.build()
-
-
-ft.app(target=main)
+    
+ft.run(main)

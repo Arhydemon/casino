@@ -11,9 +11,9 @@ class ProfileRepository: # репозиторий для работы с таб�
         with self.db.connect() as connection:
             cursor = connection.cursor()
             cursor.execute("SELECT id, name, balance FROM profile LIMIT 1")
-            row = cursor.fetchone
+            row = cursor.fetchone()
             
-            if row in None:
+            if row is None:
                 return None
             
             return ProfileModel(
@@ -69,26 +69,26 @@ class StatisticsRepository: # репозиторий для работы с та
     def __init__(self, db: DatabaseManager):
         self.db = db
 
-        def get_statistics(self, profile_id: int) -> StatisticsModel | None: # получаем статистику по id профиля
-            with self.db.connect() as connection:
-                cursor = connection.cursor()
-                cursor.execute("""
-                    SELECT id, profile_id, games_played, games_won, total_win
-                    FROM statistics
-                    WHERE profile_id = ?
-                """, (profile_id,))
+    def get_statistics(self, profile_id: int) -> StatisticsModel | None: # получаем статистику по id профиля
+        with self.db.connect() as connection:
+            cursor = connection.cursor()
+            cursor.execute("""
+                SELECT id, profile_id, games_played, games_won, total_win
+                FROM statistics
+                WHERE profile_id = ?
+            """, (profile_id,))
 
-                row = cursor.fetchone()
-                if row is None:
-                    return None
-                
-                return StatisticsModel(
-                id=row["id"],
-                profile_id=row["profile_id"],
-                games_played=row["games_played"],
-                games_won=row["games_won"],
-                total_win=row["total_win"]
-            )
+            row = cursor.fetchone()
+            if row is None:
+                return None
+            
+            return StatisticsModel(
+            id=row["id"],
+            profile_id=row["profile_id"],
+            games_played=row["games_played"],
+            games_won=row["games_won"],
+            total_win=row["total_win"]
+        )
 
     def update_statistics(
         self,
@@ -127,7 +127,7 @@ class SettingsRepository: # репозиторий для работы с таб
             return SettingsModel(
                 id=row["id"],
                 profile_id=row["profile_id"],
-                sound_enabled=bool(row["sound_enabled"]),
+                sound_enable=bool(row["sound_enabled"]),
                 theme=row["theme"]
             )
 
