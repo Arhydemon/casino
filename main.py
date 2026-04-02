@@ -21,9 +21,9 @@ class CasinoApp:
         self.balance_text: ft.Text = ft.Text(f'Балик: {self.state.player.balance}')
         self.menu_text: ft.Text = ft.Text('Выбери игру, йоу')
 
-        self.r_button: ft.ElevatedButton = ft.ElevatedButton("Рулеточка", on_click=self.open_roulette)
-        self.b_button: ft.ElevatedButton = ft.ElevatedButton('Блекджек', on_click=self.open_blackjack)
-        self.s_button: ft.ElevatedButton = ft.ElevatedButton('Слоты', on_click=self.open_slots)
+        self.r_button: ft.Button = ft.Button("Рулеточка", on_click=self.open_roulette)
+        self.b_button: ft.Button = ft.Button('Блекджек', on_click=self.open_blackjack)
+        self.s_button: ft.Button = ft.Button('Слоты', on_click=self.open_slots)
 
         self.main_menu_column: ft.Column = ft.Column(
             controls=[
@@ -56,5 +56,5 @@ class CasinoApp:
 def main(page: ft.Page) -> None:
     app = CasinoApp(page)
     app.build()
-    
+
 ft.run(main)
