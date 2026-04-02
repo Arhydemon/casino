@@ -1,36 +1,62 @@
 import flet as ft
 from app.app_state import *
+from app.core.services import AppStateService
+
+
+class CasinoApp:
+    def __init__(self, page: ft.Page):
+        self.page = page
+        self.state_service = AppStateService()
+
+        self.page.title = "Дым дым казино и бляди"
+        self.page.window.width = 800 # ширина
+        self.page.window.height = 400 # высота
+        self.page.vertical_alignment = ft.MainAxisAlignment.CENTER
+        self.page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+
+        self.state_service.initialize_database()
+        self.state: AppState = self.state_service.load_state() # без этой хуйни импорты из других файлов не будут работать
+
+        self.title_text: ft.Text = ft.Text('Казино и бляди', size=32)
+        self.balance_text: ft.Text = ft.Text(f'Балик: {self.state.player.balance}')
+        self.menu_text: ft.Text = ft.Text('Выбери игру, йоу')
+
+        self.r_button: ft.ElevatedButton = ft.ElevatedButton("Рулеточка", on_click=self.open_roulette)
+        self.b_button: ft.ElevatedButton = ft.ElevatedButton('Блекджек', on_click=self.open_blackjack)
+        self.s_button: ft.ElevatedButton = ft.ElevatedButton('Слоты', on_click=self.open_slots)
+
+        self.main_menu_column: ft.Column = ft.Column(
+            controls=[
+                self.title_text,
+                self.balance_text,
+                self.menu_text,
+                self.r_button,
+                self.b_button,
+                self.s_button
+            ],
+            alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            spacing=20
+        )
+
+    def open_roulette(self, event: ft.ControlEvent) -> None: # event это параметр, его ожидает питон, можно даже хуй или _ написать, но без этой хуйни не получится
+        self.page.show_dialog(ft.SnackBar(ft.Text('Рулетки еще нет, лудик ты ебаный')))
+
+    def open_blackjack(self, event: ft.ControlEvent) -> None:
+        self.page.show_dialog(ft.SnackBar(ft.Text('Блекджека тоже пока что нихуя нет азазааз))')))
+
+    def open_slots(self, event: ft.ControlEvent) -> None:
+        self.page.show_dialog(ft.SnackBar(ft.Text("Слоты пока не готовы")))
+
+    def build(self) -> None:
+        self.page.controls.clear()
+        self.page.add(self.main_menu_column)
+        self.page.update()
+
 
 def main(page: ft.Page) -> None:
-    page.title = "Дым дым казино и бляди"
-    page.window.width = 800 # ширина
-    page.window.height = 400 # высота
-    page.vertical_alignment = ft.MainAxisAlignment.CENTER
-    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
-
-    state: AppState = AppState() # без этой хуйни импорты из других файлов не будут работать
-
-    title_text: ft.Text = ft.Text('Казино и бляди', size=32)
-    balance_text: ft.Text = ft.Text(f'Балик: {state.player.balance}')
-    menu_text: ft.Text = ft.Text('Выбери игру, йоу')
-
-    def open_roulette(event: ft.ControlEvent) -> None: # event это параметр, его ожидает питон, можно даже хуй или _ написать, но без этой хуйни не получится
-        page.show_dialog(ft.SnackBar(ft.Text('Рулетки еще нет, лудик ты ебаный')))
-
-    def open_blackjack(event: ft.ControlEvent) -> None:
-        page.show_dialog(ft.SnackBar(ft.Text('Блекджека тоже пока что нихуя нет азазааз))')))
-
-    def open_slots(event: ft.ControlEvent) -> None:
-        page.show_dialog(ft.SnackBar(ft.Text("Слоты пока не готовы")))
+    app = CasinoApp(page)
+    app.build()
 
 
-    r_button: ft.ElevatedButton = ft.ElevatedButton("Рулеточка", on_click=open_roulette)
-    b_button: ft.ElevatedButton = ft.ElevatedButton('Блекджек', on_click=open_blackjack)
-    s_button: ft.ElevatedButton = ft.ElevatedButton('Слоты', on_click=open_slots)
-
-    main_menu_column: ft.Column = ft.Column(
-        controls=[title_text, balance_text, menu_text, r_button, b_button, s_button], alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing= 20
-    )
-
-    page.add(main_menu_column)
 ft.app(target=main)
