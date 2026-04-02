@@ -20,5 +20,5 @@ class StatisticsModel: # статистика
 class SettingsModel:
     id: int
     profile_id: int # к кому настройки относятся надеюсь не заебланил
-    sound_enable: bool # включен ли звук
+    sound_enabled: bool # включен ли звук
     theme: str # какая тема

@@ -22,18 +22,36 @@ class AppStateService:
         state.player = Player(name=profile.name, balance=profile.balance)
 
         if statistics is not None:
-            pass
+            state.games_played = statistics.games_played
+            state.games_won = statistics.games_won
+            state.total_win = statistics.total_win
+
         if settings is not None:
-            pass
-        return state
+            state.sound_enabled = settings.sound_enabled
+            return state
 
     def save_state(self, state: AppState) -> None:
         profile = self.profile_repository.get_profile()
-    
+
         if profile is None:
             profile = self.profile_repository.create_default_profile()
-    
+
+        # баланс
         self.profile_repository.update_balance(
             profile.id,
             state.player.balance
+        )
+
+        # статистика
+        self.statistics_repository.update_statistics(
+            profile_id=profile.id,
+            games_played=state.games_played,
+            games_won=state.games_won,
+            total_win=state.total_win
+        )
+
+        # настройки (пока только звук)
+        self.settings_repository.update_sound(
+            profile_id=profile.id,
+            sound_enabled=state.sound_enabled
         )

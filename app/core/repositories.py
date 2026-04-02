@@ -127,7 +127,7 @@ class SettingsRepository: # репозиторий для работы с таб
             return SettingsModel(
                 id=row["id"],
                 profile_id=row["profile_id"],
-                sound_enable=bool(row["sound_enabled"]),
+                sound_enabled=bool(row["sound_enabled"]),
                 theme=row["theme"]
             )
 

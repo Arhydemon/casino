@@ -7,13 +7,12 @@ class CasinoApp:
     def __init__(self, page: ft.Page):
         self.page = page
         self.state_service = AppStateService()
-
+        self.test_stats_button = ft.Button("Тест статистики", on_click=self.test_stats)
         self.page.title = "Дым дым казино и бляди"
         self.page.window.width = 800 # ширина
         self.page.window.height = 400 # высота
         self.page.vertical_alignment = ft.MainAxisAlignment.CENTER
         self.page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
-
         self.state_service.initialize_database()
         self.state: AppState = self.state_service.load_state() # без этой хуйни импорты из других файлов не будут работать
 
@@ -32,7 +31,8 @@ class CasinoApp:
                 self.menu_text,
                 self.r_button,
                 self.b_button,
-                self.s_button
+                self.s_button,
+                self.test_stats_button
             ],
             alignment=ft.MainAxisAlignment.CENTER,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -52,6 +52,13 @@ class CasinoApp:
         self.page.controls.clear()
         self.page.add(self.main_menu_column)
         self.page.update()
+
+    def test_stats(self, event):
+        self.state.games_played += 1
+        self.state.games_won += 1
+        self.state.total_win += 50
+        self.state_service.save_state(self.state)
+        self.page.show_dialog(ft.SnackBar(ft.Text("Стата обновлена")))
 
 def main(page: ft.Page) -> None:
     app = CasinoApp(page)
