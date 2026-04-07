@@ -1,16 +1,15 @@
 import flet as ft
 from app.app_state import *
 from app.core.services import AppStateService
-
-
+from app.games.roulette.screen import RouletteScreen
 class CasinoApp:
     def __init__(self, page: ft.Page):
         self.page = page
+        self.page.assets_dir = "assets"
         self.state_service = AppStateService()
         self.test_stats_button = ft.Button("Тест статистики", on_click=self.test_stats)
         self.page.title = "Дым дым казино и бляди"
-        self.page.window.width = 800 # ширина
-        self.page.window.height = 400 # высота
+        self.page.window.full_screen = True
         self.page.vertical_alignment = ft.MainAxisAlignment.CENTER
         self.page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
         self.state_service.initialize_database()
@@ -40,7 +39,13 @@ class CasinoApp:
         )
 
     def open_roulette(self, event: ft.ControlEvent) -> None: # event это параметр, его ожидает питон, можно даже хуй или _ написать, но без этой хуйни не получится
-        self.page.show_dialog(ft.SnackBar(ft.Text('Рулетки еще нет, лудик ты ебаный')))
+        roulette_screen = RouletteScreen(
+            self.page,
+            self.state,
+            self.state_service,
+            self.build
+        )
+        roulette_screen.build()
 
     def open_blackjack(self, event: ft.ControlEvent) -> None:
         self.page.show_dialog(ft.SnackBar(ft.Text('Блекджека тоже пока что нихуя нет азазааз))')))
