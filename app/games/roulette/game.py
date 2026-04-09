@@ -56,10 +56,14 @@ class RouletteGame:
         return number != 0 and number % 2 != 0
 
     # сколько накинуть сверху
-    def calculate_win_amount(self, bet_type: str, amount: int) -> int:
+    def calculate_win_amount(self, bet_type: str, bet_value, amount: int) -> int:
         if bet_type == "number":
             return amount * 35
-        if bet_type in ["color", "even", "odd"]:
+        if bet_type == "color":
+            if bet_value == "green":
+                return amount * 30
+            return amount
+        if bet_type in ["even", "odd"]:
             return amount
         return 0
 
@@ -104,7 +108,7 @@ class RouletteGame:
         is_win = self.check_win(spin_result, bet_type, bet_value)
 
         if is_win:
-            pure_win = self.calculate_win_amount(bet_type, amount)
+            pure_win = self.calculate_win_amount(bet_type, bet_value, amount)
             # возвращаем ставку + сверху выигрыш
             self.state.player.deposit(amount + pure_win)
             self.state.last_result = (
