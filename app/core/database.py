@@ -27,7 +27,7 @@ class DatabaseManager:
                 CREATE TABLE IF NOT EXISTS profile (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name TEXT NOT NULL DEFAULT 'Игрок',
-                    balance INTEGER NOT NULL DEFAULT 1000
+                    balance INTEGER NOT NULL DEFAULT 10000
                 )
             """)
 

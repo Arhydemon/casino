@@ -29,7 +29,7 @@ class ProfileRepository: # репозиторий для работы с таб�
             cursor.execute("""
                 INSERT INTO profile (name, balance)
                 VALUES (?, ?)
-                """, ("Игрок", 1000))
+                """, ("Игрок", 10000))
             
             # сохранение id созданного ТОЛЬКО ЧТО ПРОФИЛЯ
             profile_id = cursor.lastrowid
@@ -50,7 +50,7 @@ class ProfileRepository: # репозиторий для работы с таб�
             return ProfileModel(
                 id=profile_id,
                 name='Обезьяна ебаная',
-                balance=1000
+                balance=10000
             )
         
     def update_balance(self, profile_id: int, new_balance: int) -> None:
