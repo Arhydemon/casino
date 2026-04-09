@@ -1,6 +1,6 @@
 import threading
 import time
-import winsound
+from playsound import playsound
 import flet as ft
 from app.games.roulette.constants import (
     RED_NUMBERS,
@@ -14,12 +14,9 @@ from app.games.roulette.constants import (
 # звук тика рулетки
 def play_tick_sound() -> None:
     try:
-        winsound.PlaySound(
-            "assets/sounds/roulette.mp3",
-            winsound.SND_FILENAME | winsound.SND_ASYNC,
-        )
+        playsound("assets/sounds/roulette.mp3")
     except Exception:
-        pass
+        pass  # если звук не проигрался не ломаем игру
 
 # определяем цвет числа
 def get_number_color(number: int):
@@ -29,15 +26,15 @@ def get_number_color(number: int):
         return ft.Colors.RED
     return ft.Colors.BLACK
 
-# чтобы тик не играл слишком часто
-def maybe_play_tick(last_tick_sound_time: float, min_tick_gap: float) -> float:
+# чтобы звук не спамился
+def maybe_play_tick(last_tick_time: float, min_gap: float) -> float:
     now = time.perf_counter()
-    if now - last_tick_sound_time >= min_tick_gap:
+    if now - last_tick_time >= min_gap:
         threading.Thread(target=play_tick_sound, daemon=True).start()
         return now
-    return last_tick_sound_time
+    return last_tick_time
 
-# считаем задержку между шагами анимации
+# считаем задержку анимации
 def get_step_delay(step: int, ramp_down_steps: int) -> float:
     if step < RAMP_UP_STEPS:
         t = step / max(RAMP_UP_STEPS - 1, 1)
