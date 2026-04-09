@@ -78,6 +78,32 @@ class RouletteScreen:
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         )
 
+    # меняем тип ставки
+    def set_bet_type(self, bet_type: str):
+        self.selected_bet_type = bet_type
+        self.update_bet_inputs()
+
+    # меняем цвет
+    def set_color(self, color: str):
+        self.selected_color = color
+
+    # обновляем UI под тип ставки (пока просто заглушка чтобы не падало)
+    def update_bet_inputs(self, e=None):
+        pass
+
+    # получаем выбранную ставку
+    def get_selected_bet(self):
+        if self.selected_bet_type == "number":
+            return "number", 0  # пока 0 (у тебя нет выбора числа в UI)
+
+        if self.selected_bet_type == "color":
+            return "color", self.selected_color
+
+        if self.selected_bet_type == "even":
+            return "even", None
+
+        return "odd", None
+
     # создаем один сектор колеса
     def create_sector(self, number, x, y, angle_deg, is_active=False):
         return ft.Container(
@@ -187,10 +213,13 @@ class RouletteScreen:
         # крутим анимацию
         await self.animate_spin(final_number)
 
+        # получаем ставку
+        bet_type, bet_value = self.get_selected_bet()
+
         # играем раунд
         result = self.game.play_round_with_result(
-            "number",
-            final_number,
+            bet_type,
+            bet_value,
             amount,
             forced_number=final_number,
         )
