@@ -2,13 +2,11 @@ import random
 from dataclasses import dataclass
 from app.app_state import AppState
 
-
 # что конкретно выпало на спине
 @dataclass
 class SpinResult:
     number: int
     color: str
-
 
 # итог одного раунда рулетки
 @dataclass
@@ -17,7 +15,6 @@ class RouletteRoundResult:
     is_win: bool
     win_amount: int
     message: str
-
 
 class RouletteGame:
     # красные числа рулетки, чтобы каждый раз не ебаться
@@ -95,24 +92,21 @@ class RouletteGame:
     # тут уже вся грязная работа с балансом
     def _resolve_round(self, spin_result: SpinResult, bet_type: str, bet_value, amount: int):
         if amount <= 0:
-            self.state.last_result = "Ставка должна быть больше нуля"
+            self.state.last_result = "Ставка должна быть больше нуля пжпжпж"
             return None
 
         if amount > self.state.player.balance:
-            self.state.last_result = "Недостаточно средств"
+            self.state.last_result = "Недостаточно средств нищенка"
             return None
 
         # сначала забираем ставку
         self.state.player.withdraw(amount)
-
         is_win = self.check_win(spin_result, bet_type, bet_value)
 
         if is_win:
             pure_win = self.calculate_win_amount(bet_type, amount)
-
             # возвращаем ставку + сверху выигрыш
             self.state.player.deposit(amount + pure_win)
-
             self.state.last_result = (
                 f"Выпало {spin_result.number} "
                 f"({self.translate_color(spin_result.color)}). "
