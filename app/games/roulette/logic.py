@@ -15,7 +15,7 @@ from app.games.roulette.constants import (
 def play_tick_sound() -> None:
     try:
         winsound.PlaySound(
-            "assets/sounds/roulette.wav",
+            "assets/sounds/roulette.mp3",
             winsound.SND_FILENAME | winsound.SND_ASYNC,
         )
     except Exception:
