@@ -6,22 +6,22 @@ class Player:
     @property
     def login(self) -> str:
         return self._login
-    
+
     @property
     def balance(self) -> int:
         return self._balance
-    
+
     @balance.setter
-    def balance(self, value: int) -> int:
+    def balance(self, value: int) -> None:
         if value >= 0:
             self._balance = value
 
     def __eq__(self, other) -> bool:
-        if not isinstance(other, Player): # если other НЕ является Player ТО сразу False
+        if not isinstance(other, Player):
             return False
-        return self.login == other.login # иначе они равны
-    
-    def __ls__(self, other) -> bool:
+        return self.login == other.login
+
+    def __lt__(self, other) -> bool:
         if not isinstance(other, Player):
             return False
         return self.balance < other.balance

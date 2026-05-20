@@ -1,35 +1,12 @@
-from database.database_manager import DatabaseManager
-from models.settings import Settings
+class Settings:
+    def __init__(self, sound_enabled: int) -> None:
+        self.sound_enabled = sound_enabled
 
+    def is_sound_enabled(self) -> bool:
+        return self.sound_enabled == 1
 
-class SettingsRepository:
-    def __init__(self, db: DatabaseManager) -> None:
-        self.db = db
+    def enable_sound(self) -> None:
+        self.sound_enabled = 1
 
-    def get_settings(self) -> Settings | None:
-        row = self.db.fetchone("SELECT * FROM settings LIMIT 1")
-        if row is None:
-            return None
-        return Settings(
-            sound_enabled=row["sound_enabled"],
-        )
-
-    def create_settings(self, sound_enabled: int = 0) -> int:
-        return self.db.insert(
-            "INSERT INTO settings (sound_enabled) VALUES (?)",
-            (sound_enabled,),
-        )
-
-    def save_settings(self, settings: Settings) -> None:
-        self.db.execute(
-            """
-            UPDATE settings
-            SET sound_enabled = ?
-            WHERE id = (
-                SELECT id FROM settings
-                ORDER BY id
-                LIMIT 1
-            )
-            """,
-            (settings.sound_enabled,),
-        )
+    def disable_sound(self) -> None:
+        self.sound_enabled = 0
