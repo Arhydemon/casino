@@ -7,11 +7,13 @@ from repositories.statistics_repository import StatisticsRepository
 
 class AppStateService:
     def __init__(self, db: DatabaseManager) -> None:
+        # этот репозиторий отвечает за таблицу profile, через него можно получить игрока или создать игрока
         self.profile_repository = ProfileRepository(db)
         self.statistics_repository = StatisticsRepository(db)
         self.settings_repository = SettingsRepository(db)
 
     def load_state(self) -> AppState:
+        # этот метод загружает ВСЁ состояние приложения:
         player = self.profile_repository.get_profile()
         if player is None:
             self.profile_repository.create_profile("Ватрушка", DEFAULT_BALANCE)
