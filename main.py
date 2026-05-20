@@ -1,30 +1,37 @@
+from config import DEFAULT_BALANCE
 from database.database_manager import DatabaseManager
+from repositories.profile_repository import ProfileRepository
+from repositories.settings_repository import SettingsRepository
+from repositories.statistics_repository import StatisticsRepository
 
 def main() -> None:
-    db = DatabaseManager()
-    db.create_tables()
+    with DatabaseManager() as db:
+        db.create_tables()
+        # создаю репозитории - это класс, который работает с конкретной таблицей
+        profile_repository = ProfileRepository(db)
+        statistics_repository = StatisticsRepository(db)
+        settings_repository = SettingsRepository(db)
 
-    profile = db.fetchone("SELECT * FROM profile LIMIT 1")
-    if profile is None:
-        db.execute(
-            "INSERT INTO profile (login, balance) VALUES (?, ?)",
-            ("Ватрушка", 5000))
-        print("новый профиль создался, т.к. нихуя до этого не было")
+        # проверка есть ли профиль игрока
+        profile = profile_repository.get_profile()
+        if profile is None:
+            profile_repository.create_profile(
+                login="Ватрушка",
+                balance=DEFAULT_BALANCE,
+            )
+            print("Создан новый профиль")
+        
+        # поверка есть ли статистика.
+        statistics = statistics_repository.get_statistics()
+        if statistics is None:
+            statistics_repository.create_statistics()
+            print("Создана начальная статистика")
 
-    statistics = db.fetchone("SELECT * FROM statistics LIMIT 1")
-    if statistics is None:
-        db.execute(
-            "INSERT INTO statistics (games_played, wins, total_win) VALUES (?, ?, ?)",
-            (0, 0, 0))
-
-    settings = db.fetchone("SELECT * FROM settings LIMIT 1")
-    if settings is None:
-        db.execute(
-            "INSERT INTO settings (sound_enabled) VALUES (?)",
-            (0,))
-    db.close()
-
-    print("я создал базу всё окей чюююююювак")
+        settings = settings_repository.get_settings()
+        if settings is None:
+            settings_repository.create_settings()
+            print("Созданы настройки по умолчанию")
+    print("База данных готова")
 
 if __name__ == "__main__":
     main()
