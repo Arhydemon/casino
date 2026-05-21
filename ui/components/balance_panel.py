@@ -50,7 +50,7 @@ def build_result_banner(result: dict | None) -> ft.Container:
         border_color = "#263244"
     elif result["is_win"]:
         title = "победа..."
-        subtitle = f"ХАХА ПРОЕБАЛ)0): {result['win_amount']} | баланс: {result.get('balance', '')}"
+        subtitle = f"повезло...)0): {result['win_amount']} | баланс: {result.get('balance', '')}"
         icon = ft.Icons.EMOJI_EVENTS
         color = "#22c55e"
         background = "#052e1a"

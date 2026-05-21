@@ -294,7 +294,7 @@ class CasinoApp:
         self.page.window.on_event = self._on_window_event
 
     def _on_window_event(self, e) -> None:
-        if getattr(e, "data", None) != "close":
+        if getattr(e, "type", None) != ft.WindowEventType.CLOSE:
             return
         self.close(e)
 
