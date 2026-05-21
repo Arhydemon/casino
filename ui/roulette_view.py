@@ -34,7 +34,7 @@ def build_roulette_view(
         bgcolor="#080d13",
         content=ft.Column(
             controls=[
-                build_game_header("Рулетка", "Казино стол, колесо и быстрые ставки", on_back),
+                build_game_header("Рулетка", on_back),
                 build_balance_panel(state, balance_refs),
                 ft.Row(
                     controls=[

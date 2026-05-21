@@ -20,7 +20,7 @@ def build_slots_view(
         bgcolor="#080d13",
         content=ft.Column(
             controls=[
-                build_game_header("Слоты", "Полноценная слот машина с крупными барабанами", on_back),
+                build_game_header("Слоты", on_back),
                 build_balance_panel(state, balance_refs),
                 ft.Row(
                     controls=[
