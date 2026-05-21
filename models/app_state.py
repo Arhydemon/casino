@@ -1,6 +1,6 @@
-from models.player import *
-from models.settings import *
-from models.statistics import *
+from models.player import Player
+from models.settings import Settings
+from models.statistics import Statistics
 
 class AppState:
     def __init__(self, player: Player, settings: Settings, statistics: Statistics) -> None:

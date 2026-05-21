@@ -2,7 +2,6 @@ class Player:
     def __init__(self, login: str, balance: int) -> None:
         self._login = login
         self._balance = balance
-
     @property
     def login(self) -> str:
         return self._login

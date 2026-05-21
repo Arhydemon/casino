@@ -1,10 +1,10 @@
 from database.database_manager import DatabaseManager
 from models.statistics import Statistics
 
-
 class StatisticsRepository:
     def __init__(self, db: DatabaseManager) -> None:
         self.db = db
+
     def get_statistics(self) -> Statistics | None:
         row = self.db.fetchone("SELECT * FROM statistics LIMIT 1")
         if row is None:
@@ -14,7 +14,7 @@ class StatisticsRepository:
             wins=row["wins"],
             total_win=row["total_win"],
         )
-    
+
     def create_statistics(self) -> int:
         return self.db.insert(
             """
@@ -23,7 +23,7 @@ class StatisticsRepository:
             """,
             (0, 0, 0),
         )
-    
+
     def save_statistics(self, statistics: Statistics) -> None:
         self.db.execute(
             """
@@ -43,7 +43,7 @@ class StatisticsRepository:
                 statistics.total_win,
             ),
         )
-        
+
     def reset_statistics(self) -> None:
         self.db.execute(
             """

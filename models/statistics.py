@@ -6,11 +6,11 @@ class Statistics:
 
     def add_game(self) -> None:
         self.games_played += 1
-    
+
     def add_win(self, win_amount: int) -> None:
         self.wins += 1
         self.total_win = win_amount + self.total_win
-        
+
     def reset(self) -> None:
         self.games_played = 0
         self.wins = 0

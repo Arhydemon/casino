@@ -1,7 +1,6 @@
 from database.database_manager import DatabaseManager
 from models.player import Player
 
-
 class ProfileRepository:
     def __init__(self, db: DatabaseManager) -> None:
         self.db = db
@@ -14,13 +13,13 @@ class ProfileRepository:
             login=row["login"],
             balance=row["balance"],
         )
-    
+
     def create_profile(self, login: str, balance: int) -> int:
         return self.db.insert(
             "INSERT INTO profile (login, balance) VALUES (?, ?)",
             (login, balance),
         )
-    
+
     def update_balance(self, balance: int) -> None:
         self.db.execute(
             """
