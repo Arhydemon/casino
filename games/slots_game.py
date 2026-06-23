@@ -1,22 +1,22 @@
 import random
 from games.base_game import BaseGame
 from models.game_result import GameResult
-from settings import Config as cfg
+from settings import Config as cfg, SlotSymbol
 
 
 class SlotsGame(BaseGame): # наследуется
-    SYMBOLS = tuple(cfg.SLOT_SYMBOLS.keys()) # хранит символы по ключам в кортеже
+    SYMBOLS = cfg.SLOT_SYMBOLS
 
     def __init__(self, bet: int) -> None:
         super().__init__(bet) # супер вызывает инит родителя
-        self.reels: list[str] = [] # сами барабанчики
+        self.reels: list[SlotSymbol] = [] # сами барабанчики
 
     @property # делает из метода атрибут/свойство, но внутри всё еще метод, просто вызывается как атрибут!!!
-    def reels(self) -> list[str]:
+    def reels(self) -> list[SlotSymbol]:
         return self._reels
 
     @reels.setter
-    def reels(self, value: list[str]) -> None:
+    def reels(self, value: list[SlotSymbol]) -> None:
         self._reels = value
 
     def play_round(self) -> GameResult: # сыграть один раунд и вернуть результат игры

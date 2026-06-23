@@ -1,4 +1,5 @@
 from models.base_entity import BaseEntity
+from settings import SlotSymbol
 
 # отчёт о результатах игры
 # типа какая игра, какая ставка, выиграл или нет, сколько выиграл, как изменился баланс, что выпало вот
@@ -15,7 +16,7 @@ class GameResult(BaseEntity):
         bet_value: int | str = "", 
         number: int | None = None,
         color: str = "",
-        reels: list[str] | None = None, # символы на слотах
+        reels: list[SlotSymbol] | None = None, # символы на слотах
         balance: int = 0,
     ) -> None:
         self.game = game # название игры, работает сеттер на гейм
@@ -111,11 +112,11 @@ class GameResult(BaseEntity):
         self._color = value
 
     @property
-    def reels(self) -> list[str]:
+    def reels(self) -> list[SlotSymbol]:
         return self._reels
 
     @reels.setter
-    def reels(self, value: list[str]) -> None:
+    def reels(self, value: list[SlotSymbol]) -> None:
         self._reels = value
 
     def compare_value(self):

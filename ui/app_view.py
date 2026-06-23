@@ -91,14 +91,14 @@ class CasinoApp:
         self.slots_result_banner = UI.result_banner(None) # пустой баннер результата слотов
         self.roulette_bet_field = self._bet_field("ставка") # поле ставки для рулетки
         self.slots_bet_field = self._bet_field("ставка") # поле ставки для слотов
-        slot_symbol_keys = list(cfg.SLOT_SYMBOLS) # список ключей символов слотов
+        slot_symbol_keys = list(cfg.SLOT_SYMBOLS) # список символов слотов из Enum
         initial_slot_symbols = [
             slot_symbol_keys[index % len(slot_symbol_keys)]
             for index in range(cfg.SLOT_REEL_COUNT)
         ] # начальные символы слотов чтобы барабаны не были пустые
         self.slots_text_controls = [
             ft.Text(
-                cfg.SLOT_SYMBOLS[symbol_key],
+                symbol_key.value,
                 size=cfg.TITLE_TEXT_SIZE,
                 text_align=ft.TextAlign.CENTER,
             )
@@ -270,14 +270,14 @@ class CasinoApp:
             duration = float(cfg.SLOTS_SPIN_DURATION_SECONDS) # сколько секунд крутятся слоты
             steps = max(1, round(duration * cfg.SLOT_SPIN_STEPS_PER_SECOND)) # сколько шагов анимации
             delay = duration / steps # задержка между шагами
-            symbol_keys = list(cfg.SLOT_SYMBOLS.keys()) # все возможные символы слотов
+            symbol_keys = list(cfg.SLOT_SYMBOLS) # все значения из енума
 
             for step in range(steps):
                 if self.is_closing:
                     return # если приложение закрывается, выходим
                 for index, text_control in enumerate(self.slots_text_controls):
                     symbol_key = random.choice(symbol_keys) # случайный символ для визуальной прокрутки
-                    text_control.value = cfg.SLOT_SYMBOLS[symbol_key] # ставим символ в барабан
+                    text_control.value = symbol_key.value # ставим символ в барабан
                     is_active_phase = step % cfg.SLOT_SPIN_PHASE_MODULO == 0 # чередование активного/обычного шага
                     self.slots_reels[index].scale = (
                         cfg.SLOT_REEL_SCALE_ACTIVE
@@ -294,9 +294,7 @@ class CasinoApp:
 
             result = game.play_round() # тут слоты реально считают результат игры
             for index, symbol_key in enumerate(result.reels):
-                self.slots_text_controls[index].value = cfg.SLOT_SYMBOLS.get(
-                    symbol_key, symbol_key
-                ) # ставим финальные символы, которые реально выпали
+                self.slots_text_controls[index].value = symbol_key.value # финальные символы которые выпали
                 self.slots_reels[index].scale = cfg.SLOT_REEL_SCALE_IDLE # возвращаем обычный размер
                 self.slots_reels[index].rotate = 0 # убираем наклон
 
