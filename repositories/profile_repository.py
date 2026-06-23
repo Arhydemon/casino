@@ -1,7 +1,8 @@
 from database.database_manager import DatabaseManager
-from models.player import Player
+from models.player import Player # превращение данных полученные из БД
 
-class ProfileRepository:
+
+class ProfileRepository: # СВЯЗЬ МЕЖДУ ТАБЛИЦЕЙ profile И КЛАССОМ Player! получает игрока из БД, создаёт профиль и обновляет баланс
     def __init__(self, db: DatabaseManager) -> None:
         self.db = db
 
@@ -14,8 +15,8 @@ class ProfileRepository:
             balance=row["balance"],
         )
 
-    def create_profile(self, login: str, balance: int) -> int:
-        return self.db.insert(
+    def create_profile(self, login: str, balance: int) -> None:
+        self.db.execute(
             "INSERT INTO profile (login, balance) VALUES (?, ?)",
             (login, balance),
         )

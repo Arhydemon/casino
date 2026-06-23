@@ -1,43 +1,26 @@
-from pathlib import Path
+from pathlib import Path # Path нужен для изячной работы с путями и папками
 import sqlite3
-from config import DB_PATH
+from settings import Config as cfg
 
-class DatabaseManager:
-    # тут поднимает подключение к sqlite и подготавливает работу с row объектами
-    def __init__(self, db_path: str = DB_PATH) -> None:
-        # здесь заранее создает папку под базу чтобы не словить ошибку по пути
-        Path(db_path).parent.mkdir(parents=True, exist_ok=True)
-        # сам открывает живое соединение с файлом базы
+
+class DatabaseManager: # ГЛАВНЫЙ КЛАСС ДЛЯ РАБОТЫ С БАЗОЙ! подключается к app.db, выполняет SQL и создаёт таблицы
+    def __init__(self, db_path: str = cfg.DB_PATH) -> None: # database/app.db
+        Path(db_path).parent.mkdir(parents=True, exist_ok=True) # превращает строку в объект пути
+        # .parent получает родительскую папку, .mkdir() создаёт эту папку
         self._connection = sqlite3.connect(db_path)
-        # в этом месте делает доступ к колонкам по имени а не по индексу
         self._connection.row_factory = sqlite3.Row
 
-    # исполняет запрос на изменение данных КАК УГОДНО ПО ТИПУ insert/update/delete/create
-    def execute(self, query: str, params: tuple = ()) -> sqlite3.Cursor:
-        # здесь оборачивает команду в транзакцию с автокомитом
-        with self._connection:
+    def execute(self, query: str, # SQL запрос
+                params: tuple = ()) -> sqlite3.Cursor: # значения для знаков ? в запросе то есть плейсхолдеров
+        # курсор эта объект с результатом выполненного запроса
+        with self._connection: # with автоматически сохраняет изменения в БД
             return self._connection.execute(query, params)
-        
-    # тянет ровно одну строку из базы
-    def fetchone(self, query: str, params: tuple = ()) -> sqlite3.Row | None:
+
+    def fetchone(self, query: str, params: tuple = ()) -> sqlite3.Row | None: # fetchone() берёт только одну найденную строку
         cursor = self._connection.execute(query, params)
         return cursor.fetchone()
 
-    # список строк из базы
-    def fetchall(self, query: str, params: tuple = ()) -> list[sqlite3.Row]:
-        cursor = self._connection.execute(query, params)
-        return cursor.fetchall()
-
-    # insert и возвращает id вставленной записи
-    def insert(self, query: str, params: tuple = ()) -> int:
-        # здесь просто переиспользует общий execute чтобы не дублировать логику
-        cursor = self.execute(query, params)
-        # сам отдает lastrowid чтобы потом можно было привязыватьск записи
-        return cursor.lastrowid
-
-    # создаёт таблицы при первом запуске приложения
-    def create_tables(self) -> None:
-        # профиль игрока логин + баланс
+    def create_tables(self) -> None: # создаёт все необходимые таблицы
         self.execute(
             """
         CREATE TABLE IF NOT EXISTS profile (
@@ -46,8 +29,6 @@ class DatabaseManager:
             balance INTEGER NOT NULL
         )"""
         )
-
-        # здесь хранит статистику по играм
         self.execute(
             """
         CREATE TABLE IF NOT EXISTS statistics (
@@ -57,8 +38,6 @@ class DatabaseManager:
             total_win INTEGER NOT NULL
         )"""
         )
-
-        # хранит пользовательские настройки
         self.execute(
             """
         CREATE TABLE IF NOT EXISTS settings (
@@ -67,14 +46,5 @@ class DatabaseManager:
         )"""
         )
 
-    # закрывает подключение к базе
     def close(self) -> None:
         self._connection.close()
-
-    # позволяет писать with DatabaseManager as db
-    def __enter__(self) -> "DatabaseManager":
-        return self
-
-    # гарантирует закрытие соединенипосле блока with на сто миллионов процентов
-    def __exit__(self, exc_type, exc_value, traceback) -> None:
-        self.close()

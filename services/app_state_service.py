@@ -1,20 +1,24 @@
-from config import DEFAULT_BALANCE
 from database.database_manager import DatabaseManager
-from models.app_state import AppState
+from models.app_state import AppState # общий объект, в котором лежат игрок, статистика и настройки
 from repositories.profile_repository import ProfileRepository
 from repositories.settings_repository import SettingsRepository
 from repositories.statistics_repository import StatisticsRepository
+from settings import Config as cfg
 
-class AppStateService:
+
+class AppStateService: # СЕРВИС ДЛЯ ЗАГРУЗКИ И СОХРАНЕНИЯ СОСТОЯНИЯ! собирает данные из трёх таблиц в один объект AppState
+    # репозиторий работает с одной конкретной таблицей, а сервис управляет сразу несколькими репозиториями
     def __init__(self, db: DatabaseManager) -> None:
         self.profile_repository = ProfileRepository(db)
         self.statistics_repository = StatisticsRepository(db)
         self.settings_repository = SettingsRepository(db)
 
-    def load_state(self) -> AppState:
+    def load_state(self) -> AppState: # загружает все данные из БД и возвращает готовый AppState
         player = self.profile_repository.get_profile()
         if player is None:
-            self.profile_repository.create_profile("Ватрушка", DEFAULT_BALANCE)
+            self.profile_repository.create_profile(
+                cfg.DEFAULT_PLAYER_LOGIN, cfg.DEFAULT_BALANCE
+            )
             player = self.profile_repository.get_profile()
         statistics = self.statistics_repository.get_statistics()
         if statistics is None:
@@ -22,7 +26,7 @@ class AppStateService:
             statistics = self.statistics_repository.get_statistics()
         settings = self.settings_repository.get_settings()
         if settings is None:
-            self.settings_repository.create_settings(1)
+            self.settings_repository.create_settings(cfg.DEFAULT_SOUND_ENABLED)
             settings = self.settings_repository.get_settings()
         if player is None or statistics is None or settings is None:
             raise RuntimeError("не удалось загрузить состояние приложения")

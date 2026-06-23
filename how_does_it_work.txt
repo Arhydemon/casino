@@ -1,0 +1,20 @@
+main.py запускает приложение и создаёт CasinoApp
+дальше CasinoApp создаёт DatabasManager, который подключается к файлу database/app.db и создаёт нужные таблички
+затем создаётся AppStateService которому передаётся объект созданной БД
+AppStateService через ProfileRepository получает данные игрока!
+фух ля
+потом ProfileRepository выполняет SQL-запрос к таблице профиль и создаёт из полученных данных объект Player!!!
+
+дальше Player хранится внутри AppState вместе со статистикой и настройками
+когда человек запускает игру, то создаётся SlotsGame или RouletteGame
+метод play_round возвращает объект GameResult c результатами раунда
+
+через result.balance_change изменяется баланс игрока в player.balance
+сначала меняется ТУПО ОБЪЕКТ В ПИТОНЕ
+ПОСЛЕ ЭТОГО ВЫЗЫВАЕТСЯ save_state()
+AppStateService передаёт новый балик в ProfileRepository, а он через UPDATE закидывает его обратно в бдшчку
+
+ИТОГОВАЯ ЦЕПОЧКА:
+БД -> Repository -> Player -> AppState -> игра -> GameResult -> Player меняется -> Repository -> БД
+
+КОРОЧЕ ЗАМКНУТЫЙ КРУГ МОЖНО СКАЗАТЬ

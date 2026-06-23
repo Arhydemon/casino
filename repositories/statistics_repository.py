@@ -1,7 +1,8 @@
 from database.database_manager import DatabaseManager
 from models.statistics import Statistics
 
-class StatisticsRepository:
+
+class StatisticsRepository: # СВЯЗЬ МЕЖДУ ТАБЛИЦЕЙ statistics И ОБЪЕКТОМ Statistics! загружает статистику из БД, создаёт её и сохраняет изменения
     def __init__(self, db: DatabaseManager) -> None:
         self.db = db
 
@@ -15,8 +16,8 @@ class StatisticsRepository:
             total_win=row["total_win"],
         )
 
-    def create_statistics(self) -> int:
-        return self.db.insert(
+    def create_statistics(self) -> None:
+        self.db.execute(
             """
             INSERT INTO statistics (games_played, wins, total_win)
             VALUES (?, ?, ?)
@@ -42,20 +43,4 @@ class StatisticsRepository:
                 statistics.wins,
                 statistics.total_win,
             ),
-        )
-
-    def reset_statistics(self) -> None:
-        self.db.execute(
-            """
-            UPDATE statistics
-            SET games_played = ?,
-                wins = ?,
-                total_win = ?
-            WHERE id = (
-                SELECT id FROM statistics
-                ORDER BY id
-                LIMIT 1
-            )
-            """,
-            (0, 0, 0),
         )

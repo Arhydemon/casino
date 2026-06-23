@@ -1,308 +1,271 @@
-import math
+import math # математика нужна чтобы считать движение шарика по кругу
 import flet as ft
-from games.roulette_game import RouletteGame
-from models.app_state import AppState
-from ui.components.action_buttons import primary_button, secondary_button
-from ui.components.balance_panel import build_balance_panel
-from ui.components.game_header import build_game_header
 
-EUROPEAN_ORDER = [
-    0, 32, 15, 19, 4, 21, 2, 25, 17, 34,
-    6, 27, 13, 36, 11, 30, 8, 23, 10, 5,
-    24, 16, 33, 1, 20, 14, 31, 9, 22, 18,
-    29, 7, 28, 12, 35, 3, 26,
-]
+from games.roulette_game import RouletteGame 
+from models.app_state import AppState 
+from settings import Config as cfg 
+from ui.helpers import UI 
 
-def build_roulette_view(
+
+EUROPEAN_ORDER = cfg.ROULETTE_WHEEL_ORDER # порядок чисел на европейской рулетке
+ROULETTE_WHEEL_SIZE = 360 # размер колеса рулетки
+ROULETTE_WHEEL_CENTER = ROULETTE_WHEEL_SIZE / 2 # центр колеса тут будет 180
+ROULETTE_BALL_SIZE = 14 # размер шарика
+ROULETTE_BALL_RADIUS = ROULETTE_BALL_SIZE / 2 # радиус шарика
+ROULETTE_BALL_START_RADIUS = 136.0 # радиус где шарик начинает крутиться
+ROULETTE_BALL_END_RADIUS = 126.0 # радиус где шарик останавливается ближе к центру
+
+
+def _build_roulette_view(
     state: AppState,
-    balance_refs: dict,
-    bet_field: ft.TextField,
-    roulette_value_field: ft.TextField,
-    selected_bet_text: ft.Text,
-    selected_number_text: ft.Text,
-    wheel: ft.Stack,
-    result_banner: ft.Container,
+    bet_field: ft.TextField, # поле ввода ставки
+    selected_bet_text: ft.Text, # текст выбранной ставки, например выбрано красное
+    selected_number_text: ft.Text, # текст выпавшего числа
+    wheel: ft.Stack, # готовое колесо рулетки
+    result_banner: ft.Container, # баннер результата победа проигрыш ошибка
     on_spin,
     on_back,
-    on_select_number,
-    on_select_color,
-    on_select_even_odd,
+    on_select_number, # функция выбора числа
+    on_select_color, # функция выбора цвета
+    on_select_even_odd, # функция выбора чет нечет
 ) -> ft.Container:
     return ft.Container(
         expand=True,
-        padding=30,
-        bgcolor="#080d13",
-        content=ft.Column(
+        bgcolor="#080d13", # ФОН ЭКРАНА РУЛЕТКИ
+        alignment=ft.Alignment(0, 0), # всё содержимое по центру
+        content=ft.Column( # Column ставит элементы сверху вниз
+            width=1120, # ширина центральной части экрана рулетки
             controls=[
-                build_game_header("Рулетка", "проеби зарплату", on_back),
-                build_balance_panel(state, balance_refs),
-                ft.Row(
+                UI.title_text("Рулетка"), # заголовок экрана
+                UI.status_row(state), # строка с балансом, играми и победами
+                ft.Row( # Row ставит элементы слева направо
                     controls=[
-                        _roulette_stage(wheel, result_banner),
-                        _bet_panel(
+                        UI.panel(480, [wheel, result_banner]), # слева панель с колесом и баннером результата
+                        _bet_panel( # справа панель выбора ставки
                             bet_field,
-                            roulette_value_field,
                             selected_bet_text,
                             selected_number_text,
                             on_spin,
                             on_back,
+                            on_select_number,
                             on_select_color,
                             on_select_even_odd,
                         ),
                     ],
-                    spacing=20,
-                    vertical_alignment=ft.CrossAxisAlignment.START,
+                    alignment=ft.MainAxisAlignment.CENTER, # колесо и панель ставки по центру
+                    vertical_alignment=ft.CrossAxisAlignment.START, # оба блока начинаются сверху
+                    spacing=20, # расстояние между колесом и панелью ставки
+                    wrap=True, # если места мало то блоки переносятся вниз
                 ),
-                _number_board(on_select_number),
             ],
-            spacing=22,
-            scroll=ft.ScrollMode.AUTO,
+            alignment=ft.MainAxisAlignment.CENTER, # выравнивание внутри Column по вертикали
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER, # выравнивание внутри Column по горизонтали
+            spacing=18, # расстояние между заголовком, статусом и основным блоком
         ),
     )
 
-def build_roulette_wheel(number_text: ft.Text, ball: ft.Container) -> ft.Stack:
-    pockets = _wheel_pockets()
-    return ft.Stack(
-        width=420,
-        height=420,
+
+def _build_roulette_wheel(number_text: ft.Text, ball: ft.Container) -> ft.Stack: # функция создаёт колесо рулетки
+    return ft.Stack( # Stack позволяет класть элементы друг на друга
+        width=ROULETTE_WHEEL_SIZE, # ширина колеса
+        height=ROULETTE_WHEEL_SIZE, # высота колеса
         controls=[
-            ft.Container(
-                width=420,
-                height=420,
-                border_radius=210,
-                bgcolor="#3f2b1d",
-                border=ft.border.all(8, "#9a6b2f"),
-                shadow=ft.BoxShadow(blur_radius=28, color="#020617", offset=ft.Offset(0, 16)),
-            ),
-            ft.Container(
-                left=18,
-                top=18,
-                width=384,
-                height=384,
-                border_radius=192,
-                bgcolor="#1f2937",
-                border=ft.border.all(5, "#d4af37"),
-            ),
-            *pockets,
-            ft.Container(
-                left=110,
-                top=110,
-                width=200,
-                height=200,
-                border_radius=100,
+            _circle(ROULETTE_WHEEL_SIZE, "#3b1111", "#7f1d1d"), # большой внешний круг рулетки
+            ft.Container(left=30, top=30, content=_circle(300, "#10251d", "#f59e0b")), # внутренний круг
+            *_wheel_pockets(), # звёздочка распаковывает список чисел на колесе
+            ft.Container( # центральный круг где показывается выпавшее число
+                left=120,
+                top=120,
+                width=120,
+                height=120,
+                border_radius=60,
                 bgcolor="#111827",
-                border=ft.border.all(6, "#d4af37"),
+                border=ft.border.all(3, "#f59e0b"),
                 alignment=ft.Alignment(0, 0),
                 content=ft.Column(
                     controls=[
-                        ft.Text("LIVE WHEEL", size=16, color="#d1d5db", text_align=ft.TextAlign.CENTER),
-                        number_text,
+                        ft.Text("Выпало", size=cfg.BODY_TEXT_SIZE, color="#d1d5db"), # подпись
+                        number_text, # само число которое меняется во время вращения
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                     spacing=8,
                 ),
             ),
-            ball,
+            ball, # шарик рулетки
         ],
     )
 
-def _roulette_stage(wheel: ft.Stack, result_banner: ft.Container) -> ft.Container:
-    return ft.Container(
-        expand=True,
-        padding=26,
-        border_radius=8,
-        bgcolor="#111827",
-        border=ft.border.all(1, "#263244"),
-        shadow=ft.BoxShadow(blur_radius=34, color="#020617", offset=ft.Offset(0, 16)),
-        content=ft.Column(
-            controls=[
-                ft.Row(
-                    controls=[wheel],
-                    alignment=ft.MainAxisAlignment.CENTER,
-                ),
-                result_banner,
-            ],
-            spacing=18,
-            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-        ),
-    )
 
 def _bet_panel(
-    bet_field: ft.TextField,
-    roulette_value_field: ft.TextField,
-    selected_bet_text: ft.Text,
-    selected_number_text: ft.Text,
+    bet_field: ft.TextField, # поле ставки
+    selected_bet_text: ft.Text, # выбранная ставка
+    selected_number_text: ft.Text, # выпавшее число
     on_spin,
     on_back,
+    on_select_number,
     on_select_color,
     on_select_even_odd,
 ) -> ft.Container:
-    return ft.Container(
-        width=380,
-        padding=22,
-        border_radius=8,
-        bgcolor="#111827",
-        border=ft.border.all(1, "#263244"),
-        shadow=ft.BoxShadow(blur_radius=24, color="#020617", offset=ft.Offset(0, 12)),
-        content=ft.Column(
-            controls=[
-                ft.Text("Поле ставок", size=20, weight=ft.FontWeight.BOLD, color="#f9fafb"),
-                selected_bet_text,
-                selected_number_text,
-                bet_field,
-                roulette_value_field,
-                ft.Text("Купюры и фишки", size=15, weight=ft.FontWeight.BOLD, color="#f9fafb"),
-                ft.Text(
-                    "Можно выбрать ставку на поле слева или вручную через форму.",
-                    size=13,
-                    color="#9ca3af",
+    spin_button = UI.primary_button("Крутить", ft.Icons.PLAY_ARROW, on_spin)
+    home_button = UI.secondary_button("Домой", ft.Icons.HOME, on_back)
+    spin_button.expand = True # кнопка крутить растягивается в строке
+    home_button.expand = True # кнопка домой тоже растягивается в строке
+
+    return UI.panel(
+        460, # ширина панели ставки
+        [
+            UI.title_text("Ставка", cfg.TITLE_TEXT_SIZE), # заголовок панели
+            bet_field, # поле куда вводится ставка
+            ft.Container( # блок с выбранной ставкой и выпавшим числом
+                padding=10,
+                border_radius=8,
+                bgcolor="#0b1117",
+                content=ft.Column(
+                    controls=[selected_bet_text, selected_number_text],
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    spacing=4,
                 ),
-                ft.Row(
-                    controls=[
-                        _outside_bet("Красное", "#b91c1c", lambda e: on_select_color("red")),
-                        _outside_bet("Черное", "#111827", lambda e: on_select_color("black")),
-                    ],
-                    spacing=12,
-                ),
-                ft.Row(
-                    controls=[
-                        _outside_bet("Четное", "#1d4ed8", lambda e: on_select_even_odd("even")),
-                        _outside_bet("Нечетное", "#7c3aed", lambda e: on_select_even_odd("odd")),
-                    ],
-                    spacing=12,
-                ),
-                primary_button("Крутить рулетку", ft.Icons.PLAY_ARROW, on_spin),
-                secondary_button("В меню", ft.Icons.HOME, on_back),
-            ],
-            spacing=14,
-        ),
+            ),
+            _bet_row( # строка выбора цвета
+                [
+                    ("Красное", "#dc2626", RouletteGame.RED), # кнопка красное
+                    ("Черное", "#020617", RouletteGame.BLACK), # кнопка черное
+                ],
+                on_select_color,
+            ),
+            _bet_row( # строка выбора чет нечет
+                [
+                    ("Чет", "#2563eb", RouletteGame.EVEN),
+                    ("Нечет", "#7c3aed", RouletteGame.ODD),
+                ],
+                on_select_even_odd,
+            ),
+            _number_board(on_select_number), # поле со всеми числами рулетки
+            ft.Row(controls=[spin_button, home_button], spacing=12), # строка с кнопками крутить и домой
+        ],
     )
 
-def _number_board(on_select_number) -> ft.Container:
-    rows: list[ft.Row] = [
-        ft.Row(
-            controls=[_zero_chip(on_select_number)],
-            alignment=ft.MainAxisAlignment.CENTER,
+
+def _number_board(on_select_number) -> ft.Container: # функция создаёт доску с числами рулетки
+    rows = [_number_row([cfg.ROULETTE_MIN_NUMBER], on_select_number)] # первая строка только с 0
+    rows += [
+        _number_row(
+            range(start, min(start + 12, cfg.ROULETTE_MAX_NUMBER + 1)), on_select_number
         )
-    ]
-    for start in range(1, 37, 3):
-        controls = [_number_chip(number, on_select_number) for number in range(start, start + 3)]
-        rows.append(
-            ft.Row(
-                controls=controls,
-                alignment=ft.MainAxisAlignment.CENTER,
-                spacing=10,
-            )
-        )
+        for start in range(1, cfg.ROULETTE_MAX_NUMBER + 1, 12)
+    ] # дальше числа идут строками по 12 штук
+
     return ft.Container(
-        padding=18,
+        padding=10,
         border_radius=8,
-        bgcolor="#111827",
-        border=ft.border.all(1, "#263244"),
-        content=ft.Column(
-            controls=rows,
-            spacing=10,
-        ),
+        bgcolor="#0b1117",
+        content=ft.Column(controls=rows, spacing=5), # строки чисел идут сверху вниз
     )
 
-def _zero_chip(on_select_number) -> ft.Container:
+
+def _number_row(numbers, on_select_number) -> ft.Row: # функция создаёт одну строку чисел
+    return ft.Row(
+        controls=[_number_chip(number, on_select_number) for number in numbers], # для каждого числа создаётся кнопка
+        alignment=ft.MainAxisAlignment.CENTER,
+        spacing=6, # расстояние между числами
+    )
+
+
+def _number_chip(number: int, on_select_number) -> ft.Container: # одна кнопка числа
+    return UI.click_box(
+        str(number), # текст на кнопке это число
+        _pocket_color(number), # цвет кнопки зависит от числа
+        lambda e: on_select_number(number), # при нажатии выбирается это число
+        width=100 if number == cfg.ROULETTE_MIN_NUMBER else 30, # 0 шире остальных чисел
+        height=32,
+    )
+
+
+def _bet_row(items: list[tuple[str, str, str]], on_select) -> ft.Row: # функция создаёт строку кнопок ставки
+    return ft.Row(
+        controls=[
+            UI.click_box(
+                title, color, lambda e, value=value: on_select(value), expand=True
+            ) # создаёт кликабельную кнопку типа красное черное чет нечет
+            for title, color, value in items
+        ],
+        spacing=12,
+    )
+
+
+def _build_roulette_ball() -> ft.Container: # создаётся шарик рулетки
     return ft.Container(
-        width=320,
-        height=54,
-        border_radius=8,
-        bgcolor="#166534",
-        alignment=ft.Alignment(0, 0),
-        ink=True,
-        on_click=lambda e: on_select_number(0),
-        content=ft.Text("0", size=20, weight=ft.FontWeight.BOLD, color="#f9fafb"),
+        left=ROULETTE_WHEEL_CENTER - ROULETTE_BALL_RADIUS, # стартовая позиция шарика по X
+        top=ROULETTE_WHEEL_CENTER - ROULETTE_BALL_RADIUS, # стартовая позиция шарика по Y
+        width=ROULETTE_BALL_SIZE,
+        height=ROULETTE_BALL_SIZE,
+        border_radius=ROULETTE_BALL_RADIUS, # делает шарик круглым
+        bgcolor="#f9fafb", # белый цвет шарика
     )
 
-def _number_chip(number: int, on_select_number) -> ft.Container:
-    color = "#b91c1c" if number in RouletteGame.RED_NUMBERS else "#111827"
-    return ft.Container(
-        width=100,
-        height=56,
-        border_radius=8,
-        bgcolor=color,
-        border=ft.border.all(1, "#334155"),
-        alignment=ft.Alignment(0, 0),
-        ink=True,
-        on_click=lambda e: on_select_number(number),
-        content=ft.Text(str(number), size=18, weight=ft.FontWeight.BOLD, color="#f9fafb"),
-    )
 
-def _outside_bet(title: str, color: str, on_click) -> ft.Container:
-    return ft.Container(
-        expand=True,
-        height=52,
-        border_radius=8,
-        bgcolor=color,
-        border=ft.border.all(1, "#334155"),
-        alignment=ft.Alignment(0, 0),
-        ink=True,
-        on_click=on_click,
-        content=ft.Text(title, size=15, weight=ft.FontWeight.BOLD, color="#f9fafb"),
-    )
+def _move_ball(
+    ball: ft.Container, angle: float, radius: float = ROULETTE_BALL_START_RADIUS
+) -> None: # двигает шарик по кругу
+    x = ROULETTE_WHEEL_CENTER + math.cos(angle) * radius # позиция шарика по X
+    y = ROULETTE_WHEEL_CENTER + math.sin(angle) * radius # позиция шарика по Y
+    ball.left = x - ROULETTE_BALL_RADIUS # задаём шарик левее на его радиус
+    ball.top = y - ROULETTE_BALL_RADIUS # задаём шарик выше на его радиус
 
-def build_roulette_ball() -> ft.Container:
-    return ft.Container(
-        left=200,
-        top=24,
-        width=18,
-        height=18,
-        border_radius=9,
-        bgcolor="#f8fafc",
-        border=ft.border.all(2, "#cbd5e1"),
-        shadow=ft.BoxShadow(blur_radius=12, color="#e2e8f0", offset=ft.Offset(0, 0)),
-    )
 
-def move_ball(ball: ft.Container, angle: float, radius: float = 158.0) -> None:
-    center = 210
-    x = center + math.cos(angle) * radius
-    y = center + math.sin(angle) * radius
-    ball.left = x - 9
-    ball.top = y - 9
+def _roulette_angle_for_number(number: int) -> float: # функция считает угол для конкретного числа
+    return -math.pi / 2 + (math.pi * 2 / len(EUROPEAN_ORDER)) * EUROPEAN_ORDER.index(
+        number
+    ) # нужно чтобы понять где на колесе находится число
 
-def roulette_angle_for_number(number: int) -> float:
-    pocket_size = (math.pi * 2) / len(EUROPEAN_ORDER)
-    index = EUROPEAN_ORDER.index(number)
-    return -math.pi / 2 + pocket_size * index
 
-def roulette_number_for_angle(angle: float) -> int:
-    pocket_size = (math.pi * 2) / len(EUROPEAN_ORDER)
-    normalized = (angle + math.pi / 2) % (math.pi * 2)
-    index = round(normalized / pocket_size) % len(EUROPEAN_ORDER)
-    return EUROPEAN_ORDER[index]
+def _roulette_number_for_angle(angle: float) -> int: # функция по углу понимает какое число сейчас под шариком
+    pocket_size = math.pi * 2 / len(EUROPEAN_ORDER) # размер одного сектора рулетки
+    index = round(((angle + math.pi / 2) % (math.pi * 2)) / pocket_size) % len(
+        EUROPEAN_ORDER
+    ) # число в порядке рулетки
+    return EUROPEAN_ORDER[index] # возвращаем число по индексу
 
-def _wheel_pockets() -> list[ft.Container]:
-    controls: list[ft.Container] = []
-    center = 210
-    radius = 164
-    pocket_size = (math.pi * 2) / len(EUROPEAN_ORDER)
 
-    for index, number in enumerate(EUROPEAN_ORDER):
-        angle = -math.pi / 2 + pocket_size * index
-        x = center + math.cos(angle) * radius
-        y = center + math.sin(angle) * radius
-        controls.append(
+def _wheel_pockets() -> list[ft.Container]: # функция создаёт маленькие числа вокруг колеса
+    pockets = [] # сюда складываются все числа на колесе
+    for number in EUROPEAN_ORDER: # проходим по всем числам рулетки в правильном порядке
+        angle = _roulette_angle_for_number(number) # считаем угол где должно стоять число
+        x = ROULETTE_WHEEL_CENTER + math.cos(angle) * 150 # позиция числа по X
+        y = ROULETTE_WHEEL_CENTER + math.sin(angle) * 150 # позиция числа по Y
+        pockets.append(
             ft.Container(
-                left=x - 18,
-                top=y - 18,
-                width=36,
-                height=36,
-                border_radius=18,
-                bgcolor=_pocket_color(number),
-                border=ft.border.all(1, "#d1d5db"),
-                alignment=ft.Alignment(0, 0),
-                content=ft.Text(str(number), size=12, weight=ft.FontWeight.BOLD, color="#f9fafb"),
+                left=x - 13,
+                top=y - 13,
+                content=UI.click_box(
+                    str(number), _pocket_color(number), None, width=26, height=26
+                ), # число на колесе. тут None потому что эти числа не нажимаются
             )
         )
-    return controls
+    return pockets
 
-def _pocket_color(number: int) -> str:
-    if number == 0:
-        return "#166534"
-    if number in RouletteGame.RED_NUMBERS:
-        return "#b91c1c"
-    return "#111827"
+
+def _circle(size: int, color: str, border_color: str) -> ft.Container: # функция создаёт круг
+    return ft.Container(
+        width=size,
+        height=size,
+        border_radius=size / 2, # если радиус половина размера, получится круг
+        bgcolor=color, # цвет круга
+        border=ft.border.all(4, border_color), # рамка круга
+    )
+
+
+def _pocket_color(number: int) -> str: # функция выбирает цвет числа
+    if number == cfg.ROULETTE_MIN_NUMBER:
+        return "#16a34a" # 0 зелёный
+    return "#dc2626" if number in RouletteGame.RED_NUMBERS else "#020617" # красные числа красные а остальные черные
+
+
+class RouletteView: # класс-обёртка для экрана рулетки
+    build = staticmethod(_build_roulette_view)
+    build_wheel = staticmethod(_build_roulette_wheel)
+    build_ball = staticmethod(_build_roulette_ball)
+    move_ball = staticmethod(_move_ball)
+    angle_for_number = staticmethod(_roulette_angle_for_number)
+    number_for_angle = staticmethod(_roulette_number_for_angle)

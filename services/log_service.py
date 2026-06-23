@@ -1,21 +1,24 @@
 from datetime import datetime
-from config import LOG_PATH
+from settings import Config as cfg
 
-class LogService:
-    def __init__(self, login: str, log_path: str = LOG_PATH) -> None:
+
+class LogService: # ну чё, это просто СЕРВИС ДЛЯ ЗАПИСИ СЕАНСА В log.txt
+    # запоминает время запуска приложения и при закрытии записывает время выхода
+    def __init__(self, login: str, log_path: str = cfg.LOG_PATH) -> None:
         self.login = login
         self.log_path = log_path
         self.time_in = datetime.now()
 
     def save_session(self) -> None:
         time_out = datetime.now()
-        with open(self.log_path, "a", encoding="utf-8") as file:
-            file.write(
-                f"{self.login} | "
-                f"{self._format_time(self.time_in)} | "
-                f"{self._format_time(time_out)}\n"
-            )
-
-    @staticmethod
-    def _format_time(value: datetime) -> str:
-        return value.strftime("%d.%m.%y %H:%M:%S")
+        row = (
+            f"|{self.login:<12}| "
+            f"{self.time_in.strftime(cfg.LOG_DATETIME_FORMAT)} | "
+            f"{time_out.strftime(cfg.LOG_DATETIME_FORMAT)} |"
+        )
+        with open(self.log_path, "a", encoding=cfg.TEXT_ENCODING) as file:
+            file.write("+------------+---------------------+---------------------+\n")
+            file.write("| login      | time_in             | time_out            |\n")
+            file.write("|------------|---------------------|---------------------|\n")
+            file.write(f"{row}\n")
+            file.write("+------------+---------------------+---------------------+\n")

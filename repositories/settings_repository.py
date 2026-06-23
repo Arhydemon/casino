@@ -1,7 +1,9 @@
 from database.database_manager import DatabaseManager
 from models.settings import Settings
+from settings import Config as cfg
 
-class SettingsRepository:
+
+class SettingsRepository: # СВЯЗЬ МЕЖДУ ТАБЛИЦЕЙ settings И ОБЪЕКТОМ Settings! тупо звук создаём и всё впринципе
     def __init__(self, db: DatabaseManager) -> None:
         self.db = db
 
@@ -10,13 +12,15 @@ class SettingsRepository:
         if row is None:
             return None
         return Settings(
-            sound_enabled=row["sound_enabled"],
+            sound_enabled=bool(row["sound_enabled"]),
         )
 
-    def create_settings(self, sound_enabled: int = 1) -> int:
-        return self.db.insert(
+    def create_settings(
+        self, sound_enabled: bool = bool(cfg.DEFAULT_SOUND_ENABLED)
+    ) -> None:
+        self.db.execute(
             "INSERT INTO settings (sound_enabled) VALUES (?)",
-            (sound_enabled,),
+            (int(sound_enabled),),
         )
 
     def save_settings(self, settings: Settings) -> None:
@@ -30,5 +34,5 @@ class SettingsRepository:
                 LIMIT 1
             )
             """,
-            (settings.sound_enabled,),
+            (int(settings.sound_enabled),),
         )

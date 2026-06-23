@@ -1,159 +1,132 @@
 import flet as ft
-from models.app_state import AppState
-from ui.components.action_buttons import primary_button, secondary_button
-from ui.components.balance_panel import build_balance_panel
-from ui.components.game_header import build_game_header
+from models.app_state import AppState 
+from settings import Config as cfg
+from ui.helpers import UI
 
 
-def build_slots_view(
+def _build_slots_view(
     state: AppState,
-    balance_refs: dict,
-    bet_field: ft.TextField,
-    reel_controls: list[ft.Container],
+    bet_field: ft.TextField, 
+    reel_controls: list[ft.Container], 
     result_banner: ft.Container,
     on_play,
     on_back,
 ) -> ft.Container:
     return ft.Container(
         expand=True,
-        padding=30,
-        bgcolor="#080d13",
-        content=ft.Column(
+        bgcolor="#080d13", # ФОН ЭКРАНА СЛОТОВ
+        alignment=ft.Alignment(0, 0), # местоположение всего экрана слотов
+        content=ft.Column( # Column ставит элементы сверху вниз
+            width=920, # ширина центральной части экрана слотов
             controls=[
-                build_game_header("Слоты", "мама будет в шоке", on_back),
-                build_balance_panel(state, balance_refs),
-                ft.Row(
+                UI.title_text("Слоты"), # заголовок экрана
+                UI.status_row(state), # строка с балансом, играми и победами
+                ft.Row( # Row ставит элементы слева направо
                     controls=[
-                        _slot_machine(reel_controls, result_banner),
-                        _slot_panel(bet_field, on_play, on_back),
+                        _slot_machine(reel_controls, result_banner), # слева сам автомат с барабанами
+                        _slot_panel(bet_field, on_play, on_back), # справа панель ставки и кнопок
                     ],
-                    spacing=20,
-                    vertical_alignment=ft.CrossAxisAlignment.START,
+                    alignment=ft.MainAxisAlignment.CENTER, # автомат и панель по центру
+                    vertical_alignment=ft.CrossAxisAlignment.START, # элементы начинаются сверху на одной линии
+                    spacing=20, # расстояние между автоматом и панелью ставки
+                    wrap=True, # если места мало, панель перенесётся вниз
                 ),
             ],
-            spacing=22,
-            scroll=ft.ScrollMode.AUTO,
+            alignment=ft.MainAxisAlignment.CENTER, # выравнивание элементов внутри Column по вертикали
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER, # выравнивание элементов внутри Column по горизонтали
+            spacing=18, # расстояние между заголовком, статусом и блоком игры
         ),
     )
 
 
-def build_reel(symbol_text: ft.Text) -> ft.Container:
+def _build_reel(symbol_text: ft.Text) -> ft.Container: # функция создаёт один барабан слотов
     return ft.Container(
-        width=180,
-        height=230,
-        border_radius=8,
-        gradient=ft.LinearGradient(
-            begin=ft.Alignment(0, -1),
-            end=ft.Alignment(0, 1),
-            colors=["#f8fafc", "#d1d5db", "#94a3b8"],
-        ),
-        border=ft.border.all(5, "#facc15"),
-        alignment=ft.Alignment(0, 0),
-        animate_scale=ft.Animation(110, ft.AnimationCurve.EASE_OUT),
-        animate_rotation=ft.Animation(110, ft.AnimationCurve.EASE_OUT),
-        shadow=ft.BoxShadow(blur_radius=18, color="#020617", offset=ft.Offset(0, 8)),
-        content=ft.Container(
-            width=138,
-            height=174,
-            border_radius=8,
-            bgcolor="#0f172a",
-            alignment=ft.Alignment(0, 0),
-            content=symbol_text,
+        width=108, # ширина барабана
+        height=128, # высота барабана
+        border_radius=8, # скругление углов барабана
+        bgcolor="#f8fafc", # внешний светлый фон барабана
+        border=ft.border.all(3, "#f59e0b"), # оранжевая рамка барабана, 3 это толщина
+        alignment=ft.Alignment(0, 0), # всё внутри барабана по центру
+        animate_scale=ft.Animation(180, ft.AnimationCurve.EASE_OUT), # анимация увеличения барабана
+        animate_rotation=ft.Animation(180, ft.AnimationCurve.EASE_OUT), # анимация наклона барабана
+        content=ft.Container( # внутреннее тёмное окошко барабана
+            width=84, # ширина внутреннего окошка
+            height=100, # высота внутреннего окошка
+            border_radius=8, # скругление внутреннего окошка
+            bgcolor="#0b1117", # фон внутри барабана
+            alignment=ft.Alignment(0, 0), # символ внутри по центру
+            content=symbol_text, # сам символ слота
         ),
     )
 
 
-def _slot_machine(reel_controls: list[ft.Container], result_banner: ft.Container) -> ft.Container:
+def _slot_machine(
+    reel_controls: list[ft.Container], result_banner: ft.Container
+) -> ft.Container:
     return ft.Container(
-        expand=True,
-        padding=26,
-        border_radius=8,
-        bgcolor="#7f1d1d",
-        border=ft.border.all(3, "#facc15"),
-        shadow=ft.BoxShadow(blur_radius=34, color="#020617", offset=ft.Offset(0, 16)),
-        content=ft.Column(
+        width=500, # ширина автомата
+        padding=16, # внутренний отступ автомата
+        border_radius=8, # скругление углов автомата
+        bgcolor="#4a0f0f", # красный фон автомата
+        border=ft.border.all(3, "#f59e0b"), # оранжевая рамка автомата
+        content=ft.Column( # внутри автомата элементы идут сверху вниз
             controls=[
-                ft.Container(
-                    height=76,
-                    border_radius=8,
-                    bgcolor="#111827",
-                    border=ft.border.all(2, "#facc15"),
-                    alignment=ft.Alignment(0, 0),
-                    content=ft.Text(
-                        "JACKPOT 777",
-                        size=34,
-                        color="#facc15",
-                        weight=ft.FontWeight.BOLD,
-                    ),
+                ft.Text(
+                    "JACKPOT 777", # надпись сверху автомата
+                    size=cfg.TITLE_TEXT_SIZE,
+                    color="#f59e0b",
+                    weight=ft.FontWeight.BOLD,
+                    text_align=ft.TextAlign.CENTER,
                 ),
-                ft.Container(
-                    padding=24,
-                    border_radius=8,
-                    bgcolor="#450a0a",
-                    border=ft.border.all(2, "#991b1b"),
-                    content=ft.Row(
-                        controls=reel_controls,
-                        alignment=ft.MainAxisAlignment.CENTER,
-                        spacing=20,
-                    ),
+                ft.Row( # строка с барабанами
+                    controls=reel_controls, # сюда приходят 3 готовых барабана
+                    alignment=ft.MainAxisAlignment.CENTER, # барабаны по центру
+                    spacing=16, # расстояние между барабанами
                 ),
-                ft.Row(
+                ft.Row( # строка с выплатами
                     controls=[
-                        _payline("2 совпадения", "x2"),
-                        _payline("3 совпадения", "x5"),
-                        _payline("7 7 7", "x5"),
+                        _payline("2 совпало", f"x{cfg.SLOT_PAYTABLE.get(2, 0)}"), # плашка выплаты за 2 совпадения
+                        _payline("3 совпало", f"x{cfg.SLOT_PAYTABLE.get(3, 0)}"), # плашка выплаты за 3 совпадения
                     ],
-                    spacing=12,
-                    wrap=True,
+                    alignment=ft.MainAxisAlignment.CENTER, # плашки по центру
+                    spacing=12, # расстояние между плашками выплат
                 ),
-                result_banner,
+                result_banner, # баннер результата после прокрутки
             ],
-            spacing=18,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER, # всё внутри автомата по центру
+            spacing=12, # расстояние между надписью, барабанами, выплатами и баннером
         ),
     )
 
 
-def _slot_panel(bet_field: ft.TextField, on_play, on_back) -> ft.Container:
+def _slot_panel(bet_field: ft.TextField, on_play, on_back) -> ft.Container: # правая панель со ставкой и кнопками
+    return UI.panel(
+        300, # ширина панели
+        [
+            UI.title_text("Ставка", cfg.TITLE_TEXT_SIZE), # заголовок панели
+            bet_field, # поле ввода ставки
+            UI.primary_button("Крутить", ft.Icons.PLAY_ARROW, on_play), # кнопка крутить, запускает слоты
+            UI.secondary_button("Домой", ft.Icons.HOME, on_back), # кнопка домой, возвращает в главное меню
+        ],
+    )
+
+
+def _payline(label: str, value: str) -> ft.Container: # функция создаёт маленькую плашку выплаты
     return ft.Container(
-        width=360,
-        padding=22,
-        border_radius=8,
-        bgcolor="#111827",
-        border=ft.border.all(1, "#263244"),
-        shadow=ft.BoxShadow(blur_radius=24, color="#020617", offset=ft.Offset(0, 12)),
-        content=ft.Column(
-            controls=[
-                ft.Text("Панель игрока", size=20, weight=ft.FontWeight.BOLD, color="#f9fafb"),
-                bet_field,
-                ft.Container(
-                    padding=14,
-                    border_radius=8,
-                    bgcolor="#0b1117",
-                    content=ft.Text(
-                        "Жми кнопку чтобы крутить барабаны",
-                        size=13,
-                        color="#9ca3af",
-                    ),
-                ),
-                primary_button("Крутить барабаны", ft.Icons.PLAY_ARROW, on_play),
-                secondary_button("В меню", ft.Icons.HOME, on_back),
-            ],
-            spacing=14,
+        width=130, # ширина плашки
+        padding=ft.padding.symmetric(horizontal=12, vertical=8), # отступы внутри плашки
+        border_radius=8, # скругление углов плашки
+        bgcolor="#111827", # фон плашки
+        alignment=ft.Alignment(0, 0), # текст по центру
+        content=ft.Text(
+            f"{label}: {value}", # текст типа 2 совпало: x2
+            size=cfg.BODY_TEXT_SIZE,
+            color="#f59e0b",
+            weight=ft.FontWeight.BOLD,
         ),
     )
 
 
-def _payline(label: str, value: str) -> ft.Container:
-    return ft.Container(
-        padding=ft.padding.symmetric(horizontal=14, vertical=10),
-        border_radius=8,
-        bgcolor="#111827",
-        border=ft.border.all(1, "#facc15"),
-        content=ft.Row(
-            controls=[
-                ft.Text(label, size=13, color="#d1d5db"),
-                ft.Text(value, size=13, color="#facc15", weight=ft.FontWeight.BOLD),
-            ],
-            spacing=8,
-        ),
-    )
+class SlotsView: # класс-обёртка для экрана слотов
+    build = staticmethod(_build_slots_view) # сборка всего экрана слотов
+    build_reel = staticmethod(_build_reel) # создание одного барабана
