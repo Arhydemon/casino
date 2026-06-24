@@ -16,15 +16,11 @@
   <a href="#russian">Русский</a>
 </p>
 
-> Educational Python/Flet project. The app simulates casino mechanics for learning purposes only and does not use real money.
-
 ## English
 
 ### Overview
 
 **Dym Dym Casino** is a polished desktop casino simulator built with Python and Flet. It includes a dark interface, animated roulette, animated slot reels, sound control, persistent player balance, game statistics and a ready PyInstaller command for creating a portable Windows `.exe`.
-
-The project is split into clear layers: UI screens, game logic, data models, services, repositories and SQLite storage. This makes the repository easy to read, extend and present as a serious desktop application.
 
 ### Features
 
@@ -126,22 +122,11 @@ database/app.db
 
 It stores the player profile, current balance, total games played, wins, total winnings and sound setting.
 
-### Why This Project Looks Solid
-
-- Real desktop UI instead of console-only gameplay.
-- Clear separation between interface, logic and persistence.
-- Local database instead of temporary in-memory state.
-- Animated gameplay with configurable timing.
-- Build pipeline for a standalone Windows executable.
-- Human-readable project structure suitable for presentation and review.
-
 ## Russian
 
 ### Обзор
 
-**Dym Dym Casino** — это учебное desktop-приложение на Python и Flet в формате казино-симулятора. В проекте есть тёмный интерфейс, анимированная рулетка, анимированные слоты, переключатель звука, сохранение баланса игрока, статистика игр и готовая команда для сборки Windows `.exe`.
-
-Проект разделён на понятные слои: экраны интерфейса, игровая логика, модели данных, сервисы, репозитории и локальная SQLite-база. Благодаря этому репозиторий выглядит аккуратно, легко читается и нормально подходит для защиты или демонстрации.
+**Dym Dym Casino** — это desktop-приложение на Python и Flet в формате казино-симулятора. В проекте есть тёмный интерфейс, анимированная рулетка, анимированные слоты, переключатель звука, сохранение баланса игрока, статистика игр и готовая команда для сборки Windows `.exe`.
 
 ### Возможности
 
@@ -242,18 +227,3 @@ database/app.db
 ```
 
 В ней хранятся профиль игрока, текущий баланс, количество сыгранных игр, победы, общий выигрыш и настройка звука.
-
-### Почему проект выглядит солидно
-
-- Это полноценное desktop-приложение, а не консольная игра.
-- Интерфейс, логика и база данных разделены по разным слоям.
-- Есть локальное сохранение данных через SQLite.
-- Есть анимации и настраиваемые тайминги.
-- Есть готовая сборка в самостоятельный Windows `.exe`.
-- Структура проекта понятная и подходит для объяснения на защите.
-
-## Notes
-
-This repository is made for learning, practice and demonstration. It is not a gambling product, does not process payments and does not interact with any external casino services.
-
-Этот репозиторий сделан для обучения, практики и демонстрации. Это не азартный продукт, он не принимает платежи и не связан с реальными казино-сервисами.
